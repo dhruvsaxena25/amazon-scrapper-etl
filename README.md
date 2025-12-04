@@ -847,11 +847,9 @@ For interactive API documentation with live testing capabilities, visit:
 
 ---
 
-**Made with ❤️ for Amazon scraping workflows by Dhruv Saxena**
+- **Made with ❤️ for Amazon scraping workflows by Dhruv Saxena**
 
----
-
-**Also Visit: [dhruvsaxena25.com](https://dhruvsaxena25.com/) for more details.**
+- **Also Visit: [dhruvsaxena25.com](https://dhruvsaxena25.com/) for more details.**
 
 ---
 

@@ -18,3 +18,11 @@ structlog>=23.1.0
 
 # Optional: For better performance
 lxml>=4.9.0
+
+
+# Fast API related dependencies
+fastapi[standard]
+uvicorn[standard]
+jinja2==3.1.6
+aiofiles==25.1.0
+

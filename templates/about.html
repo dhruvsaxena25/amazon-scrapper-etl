@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}About - Amazon Scraper{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Hero Section -->
+    <div class="text-center mb-12 animate-fade-in">
+        <div class="inline-block mb-6">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl mx-auto animate-bounce-slow">
+                <i class="fas fa-info-circle text-4xl text-white"></i>
+            </div>
+        </div>
+        <h1 class="text-5xl font-extrabold mb-4">
+            <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                About Amazon Scraper
+            </span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Your professional solution for extracting Amazon product data
+        </p>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+        <div class="p-10">
+            <!-- Introduction -->
+            <div class="mb-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                        <i class="fas fa-rocket text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900">What We Do</h2>
+                </div>
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    Amazon Scraper Router is a powerful FastAPI application designed to extract comprehensive product data 
+                    from Amazon through multiple specialized pipelines. Built with modern technologies and best practices, 
+                    it provides a reliable, fast, and efficient solution for data extraction needs.
+                </p>
+            </div>
+
+            <!-- Features Section -->
+            <div class="mb-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                        <i class="fas fa-star text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900">Features</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-start gap-4 bg-gradient-to-br from-orange-50 to-orange-100 p-5 rounded-xl border border-orange-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-rocket text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 mb-1">Main Pipeline</h3>
+                            <p class="text-sm text-gray-700">Complete end-to-end scraping of URLs and product data in one operation</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl border border-blue-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-link text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 mb-1">URL Pipeline</h3>
+                            <p class="text-sm text-gray-700">Focused extraction of product URLs from search results</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl border border-purple-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-box text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 mb-1">Product Pipeline</h3>
+                            <p class="text-sm text-gray-700">Detailed product data extraction from provided URLs</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-xl border border-green-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-eye-slash text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 mb-1">Headless Mode</h3>
+                            <p class="text-sm text-gray-700">Run scrapers invisibly in the background for efficiency</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 bg-gradient-to-br from-pink-50 to-pink-100 p-5 rounded-xl border border-pink-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="w-10 h-10 rounded-lg bg-pink-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-download text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 mb-1">Data Export</h3>
+                            <p class="text-sm text-gray-700">Automatic saving of results with timestamps as JSON files</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 bg-gradient-to-br from-indigo-50 to-indigo-100 p-5 rounded-xl border border-indigo-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-shield-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 mb-1">Reliable & Fast</h3>
+                            <p class="text-sm text-gray-700">Built for performance with error handling and retries</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technology Stack -->
+            <div class="mb-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                        <i class="fas fa-code text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900">Technology Stack</h2>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl text-center border border-blue-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+                        <i class="fab fa-python text-5xl text-blue-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="font-bold text-gray-900 text-lg">FastAPI</h3>
+                        <p class="text-xs text-gray-600 mt-1">High-performance API framework</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-xl text-center border border-cyan-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+                        <i class="fab fa-html5 text-5xl text-cyan-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="font-bold text-gray-900 text-lg">Tailwind CSS</h3>
+                        <p class="text-xs text-gray-600 mt-1">Modern utility-first CSS</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl text-center border border-yellow-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+                        <i class="fab fa-js text-5xl text-yellow-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="font-bold text-gray-900 text-lg">Alpine.js</h3>
+                        <p class="text-xs text-gray-600 mt-1">Lightweight JavaScript</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl text-center border border-purple-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+                        <i class="fas fa-robot text-5xl text-purple-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="font-bold text-gray-900 text-lg">Selenium</h3>
+                        <p class="text-xs text-gray-600 mt-1">Browser automation</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Version Info -->
+            <div class="text-center bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl p-8 border-2 border-orange-200">
+                <p class="text-gray-700 text-lg mb-2">Current Version</p>
+                <p class="text-5xl font-extrabold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
+                    1.0.0
+                </p>
+                <p class="text-sm text-gray-600 mt-3">Latest stable release</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

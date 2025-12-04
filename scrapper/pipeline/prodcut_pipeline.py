@@ -31,7 +31,8 @@ class AmazonProductScrapingPipeline:
         url_file_path: str | Path,
         headless: bool = False,
         wait_timeout: int = 10,
-        page_load_timeout: int = 20
+        page_load_timeout: int = 20,
+        return_prod_data: bool = False
     ):
         """
         Initialize the product scraping pipeline.
@@ -41,11 +42,13 @@ class AmazonProductScrapingPipeline:
             headless: Run browsers in headless mode (default: False)
             wait_timeout: Element wait timeout in seconds (default: 10)
             page_load_timeout: Page load timeout in seconds (default: 20)
+            return_prod_data: Return scraped data along with artifact (default: False)
         """
         self.url_file_path = Path(url_file_path)
         self.headless = headless
         self.wait_timeout = wait_timeout
         self.page_load_timeout = page_load_timeout
+        self.return_prod_data = return_prod_data
 
         # Pipeline artifacts
         self.data_config: DataConfig = None
@@ -100,12 +103,13 @@ class AmazonProductScrapingPipeline:
         log.info(f"✅ {stage_name} - COMPLETED")
         log.info(f"{'✓'*80}\n")
 
-    def run(self) -> ProductDataArtifact:
+    def run(self) -> ProductDataArtifact | tuple[ProductDataArtifact, dict]:
         """
         Execute product scraping pipeline.
 
         Returns:
             ProductDataArtifact containing path to products.json and statistics
+            or (ProductDataArtifact, dict) when self.return_prod_data is True
         """
         self._log_stage_header("🚀 AMAZON PRODUCT SCRAPING PIPELINE")
 
@@ -128,6 +132,7 @@ class AmazonProductScrapingPipeline:
             log.info(f"👁️ Headless mode: {self.headless}")
             log.info(f"⏱️ Wait timeout: {self.wait_timeout}s")
             log.info(f"⏱️ Page load timeout: {self.page_load_timeout}s\n")
+            log.info(f"📊 Return product data: {self.return_prod_data}\n")
 
             # Initialize product scraper
             product_scraper = AmazonProductScraper(
@@ -135,27 +140,44 @@ class AmazonProductScrapingPipeline:
                 url_data_artifact=self.url_artifact,
                 headless=self.headless,
                 wait_timeout=self.wait_timeout,
-                page_load_timeout=self.page_load_timeout
+                page_load_timeout=self.page_load_timeout,
+                return_prod_data=self.return_prod_data
             )
 
             # Run product scraping
-            self.product_artifact = product_scraper.run()
+            result = product_scraper.run()
+
+            # Unpack result based on return_prod_data setting
+            if self.return_prod_data:  
+                self.product_artifact, scraped_data = result
+            else:
+                self.product_artifact = result
+                scraped_data = None
 
             # Calculate duration
             pipeline_end = datetime.now()
             duration = (pipeline_end - pipeline_start).total_seconds()
 
             # Log summary
-            self._log_pipeline_summary(duration)
+            self._log_pipeline_summary(duration, scraped_data)
 
+            # Return based on return_prod_data flag
+            if self.return_prod_data:  
+                return self.product_artifact, scraped_data
             return self.product_artifact
 
         except Exception as e:
             log.error("❌ Product scraping pipeline failed", exc_info=True)
             raise CustomException(e, sys)
 
-    def _log_pipeline_summary(self, duration: float):
-        """Log pipeline execution summary."""
+    def _log_pipeline_summary(self, duration: float, data: dict | None = None):
+        """
+        Log pipeline execution summary.
+        
+        Args:
+            duration: Pipeline execution time in seconds
+            data: Optional scraped data dictionary for enhanced logging
+        """
         log.info(f"\n{'#'*80}")
         log.info(f"🎉 PRODUCT SCRAPING PIPELINE COMPLETED")
         log.info(f"{'#'*80}")
@@ -173,8 +195,30 @@ class AmazonProductScrapingPipeline:
             success_rate = (self.product_artifact.scraped_count / total * 100) if total > 0 else 0
             log.info(f"└── Success rate: {success_rate:.2f}%")
 
-        log.info(f"\n{'#'*80}\n")
+        # Enhanced logging when data is available
+        if data:
+            log.info(f"\n📦 SCRAPED PRODUCT DATA SUMMARY:")
+            log.info(f"├── Total scraped: {data.get('total_scraped', 0)}")
+            log.info(f"├── Total failed: {data.get('total_failed', 0)}")
+            log.info(f"└── Categories:")
+            
+            for category, products in data.get('products', {}).items():
+                log.info(f"    ├── {category}: {len(products)} product(s)")
+                
+                # Show details of first product in category
+                for product in products[:1]:  # Only first product
+                    if product.get('Product Name'):
+                        log.info(f"    │   ├── Name: {product['Product Name'][:50]}...")
+                    if product.get('Product Price'):
+                        log.info(f"    │   ├── Price: {product['Product Price']}")
+                    if product.get('Ratings'):
+                        log.info(f"    │   ├── Rating: {product['Ratings']}/5")
+                    if product.get('Total Reviews'):
+                        log.info(f"    │   ├── Reviews: {product['Total Reviews']}")
+                    if product.get('Customer Reviews'):
+                        log.info(f"    │   └── Customer reviews: {len(product['Customer Reviews'])} loaded")
 
+        log.info(f"\n{'#'*80}\n")
 
 
 # ==================== MAIN EXECUTION ====================
@@ -191,20 +235,46 @@ def main():
             url_file_path=url_file_path,
             headless=False,  # Set to True to hide browser
             wait_timeout=10,
-            page_load_timeout=20
+            page_load_timeout=20,
+            return_prod_data=True
         )
 
         # Execute pipeline
-        product_artifact = pipeline.run()
+        result = pipeline.run()
 
-        # Access results
-        print(f"\n✅ Product scraping completed!")
-        print(f"📁 Products saved to: {product_artifact.product_file_path}")
+        # Handle result based on return_prod_data setting
+        
+        if pipeline.return_prod_data:  # ← Changed from return_data
+            product_artifact, scraped_data = result 
+            
+            # Access results
+            print(f"\n✅ Product scraping completed with data!")
+            print(f"📁 Products saved to: {product_artifact.product_file_path}")
 
-        if hasattr(product_artifact, 'scraped_count'):
-            print(f"\n📊 Results:")
-            print(f"  • Successful: {product_artifact.scraped_count}")
-            print(f"  • Failed: {product_artifact.failed_count}")
+            if hasattr(product_artifact, 'scraped_count'):
+                print(f"\n📊 Results:")
+                print(f"  • Successful: {product_artifact.scraped_count}")
+                print(f"  • Failed: {product_artifact.failed_count}")
+
+            print(f"\n📦 In-memory data:")
+            print(f"   Total scraped: {scraped_data['total_scraped']}")
+            print(f"   Total failed: {scraped_data['total_failed']}")
+            print(f"\n   Categories breakdown:")
+            for category, products in scraped_data['products'].items():
+                print(f"   - {category}: {len(products)} products")
+                # Show first product name if available
+                if products and products[0].get('Product Name'):
+                    print(f"     First: {products[0]['Product Name'][:60]}...")
+        else:
+            product_artifact = result
+
+            print(f"\n✅ Product scraping completed!")
+            print(f"📁 Products saved to: {product_artifact.product_file_path}")
+
+            if hasattr(product_artifact, 'scraped_count'):
+                print(f"\n📊 Results:")
+                print(f"  • Successful: {product_artifact.scraped_count}")
+                print(f"  • Failed: {product_artifact.failed_count}")
 
     except Exception as e:
         log.error(f"Product scraping pipeline failed: {e}", exc_info=True)

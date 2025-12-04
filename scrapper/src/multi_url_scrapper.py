@@ -42,7 +42,8 @@ class AmazonUrlScraper:
         headless: bool = False,
         wait_timeout: int = 5,
         page_load_timeout: int = 15,
-        locators_config_path: str = None):
+        locators_config_path: str = None,
+        return_url_data: bool = False):
     
         # Configs
         self.data_config = data_config
@@ -67,7 +68,8 @@ class AmazonUrlScraper:
         self.headless = bool(headless)
         self.wait_timeout = int(wait_timeout)
         self.page_load_timeout = int(page_load_timeout)
-
+        self.return_url_data = return_url_data
+        
         # Base URL (strip trailing slash to avoid //)
         self.base_url = (BASE_URL or "https://www.amazon.in/").rstrip("/")
 
@@ -298,22 +300,21 @@ class AmazonUrlScraper:
             total = final_payload["total_urls"]
             log.info(f"Saved {total} URLs across {len(self.all_results)} products -> {self.url_cfg.url_file_path}")
             
+            return final_payload
+        
         except Exception as e:
             log.error("Failed to save URL JSON.", exc_info=True)
             raise CustomException(e, sys)
 
     # ----------------- Public API -----------------
-    def run(self, return_data: bool = False) -> UrlDataArtifact | tuple[UrlDataArtifact, dict]:
+    def run(self) -> UrlDataArtifact | tuple[UrlDataArtifact, dict]:
         """
         Main execution method to scrape URLs for all search terms.
-        
-        Args:
-            return_data: If True, also return the scraped data dict in addition to the artifact.
-        
+
         Returns:
-            - If return_data is False (default): UrlDataArtifact
-            - If return_data is True: (UrlDataArtifact, dict)  # (artifact, data)
-    """
+            UrlDataArtifact
+            or (UrlDataArtifact, dict) when self.return_url_data is True
+        """
         if not self.search_terms:
             raise CustomException(ValueError("At least one search_term is required."), sys)
         
@@ -344,15 +345,19 @@ class AmazonUrlScraper:
                 self.all_results[search_term] = self.urls[:target]
                 log.info(f"Collected {len(self.urls)} URLs for '{search_term}'")
             
-            # Save and capture the data payload
-            final_payload = self._save()
-            
+            payload = self._save()  # returns the dict
             artifact = UrlDataArtifact(url_file_path=self.url_cfg.url_file_path)
-            
-            # Return both artifact and data if requested
-            if return_data:
-                return artifact, final_payload
-            return artifact
+
+
+            if self.return_url_data:
+                log.info(f"✅ RETURNING TUPLE: (artifact, payload)")
+                return_value = (artifact, payload)
+                log.info(f"🔍 return_value type = {type(return_value)}")
+                log.info(f"🔍 return_value length = {len(return_value) if isinstance(return_value, tuple) else 'N/A'}")
+                return return_value
+            else:
+                log.info(f"✅ RETURNING ARTIFACT ONLY")
+                return artifact
         
         except CustomException:
             raise

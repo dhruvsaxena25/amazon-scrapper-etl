@@ -213,3 +213,4 @@ exp/
 logs/
 venv/
 UPDATING_GUIDE.md 
+url_scrapper.py 

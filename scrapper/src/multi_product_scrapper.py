@@ -5,9 +5,11 @@ import json
 import time
 import random
 
+
 # Add the project root to the Python path
 project_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(project_root))
+
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -16,12 +18,14 @@ from selenium.common.exceptions import TimeoutException
 import undetected_chromedriver as uc
 from webdriver_manager.chrome import ChromeDriverManager
 
+
 from scrapper.exception.custom_exception import CustomException
 from scrapper.logger import GLOBAL_LOGGER as log
 from scrapper.utils.main_utils import save_json_file, read_json_file
 from scrapper.entity.config_entity import DataConfig, ProductDataConfig
 from scrapper.entity.artifact_entity import UrlDataArtifact, ProductDataArtifact
 from scrapper.entity.product_locator_entity import AmazonLocators
+
 
 
 class AmazonProductScraper:
@@ -96,7 +100,16 @@ class AmazonProductScraper:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument("--incognito")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--enable-features=NetworkServiceInProcess")
+        options.add_argument("--disable-features=NetworkService")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1280,900")
         options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        options.add_argument("--disable-software-rasterizer")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-browser-side-navigation")
         
         return options
     
@@ -163,15 +176,22 @@ class AmazonProductScraper:
             log.warning(f'Page may not be fully loaded: "{self.driver.title}"')
     
     def _handle_bot_detection(self):
-        """Amazon anti-bot 'Continue shopping'"""
+        """Handle Amazon anti-bot 'Continue shopping' button if it appears."""
         try:
-            continue_btn = self.wait.until(
+            # Use shorter wait time to avoid delays when button is not present
+            short_wait = WebDriverWait(self.driver, 3)
+            continue_btn = short_wait.until(
                 EC.element_to_be_clickable(self.locators.continue_button.as_tuple())
             )
             continue_btn.click()
-            time.sleep(3)
+            time.sleep(2)
+            log.info("✓ Bot detection handled - clicked continue button")
             return True
         except TimeoutException:
+            # Button not present - this is normal
+            return False
+        except Exception as e:
+            log.debug(f"Bot detection check failed: {e}")
             return False
   
     def _load_urls_from_artifact(self):
@@ -200,6 +220,7 @@ class AmazonProductScraper:
             log.error("Failed to load URLs from artifact", exc_info=True)
             raise CustomException(e, sys)
 
+
     
     # ==================== Scraping Method with YAML Locators ====================
     
@@ -215,7 +236,12 @@ class AmazonProductScraper:
             dict: Product data
         """
         self.driver.get(url)
-        self._wait_for_page_load()        
+        self._wait_for_page_load()
+        
+        # Check for bot detection after page load
+        if self._handle_bot_detection():
+            self._wait_for_page_load()
+        
         time.sleep(random.uniform(2, 4))
         
         data = {
@@ -411,7 +437,7 @@ class AmazonProductScraper:
                 scraped_count=self.scraped_count,
                 failed_count=self.failed_count
             )
-            if self.return_prod_data:  # ← Changed from return_data
+            if self.return_prod_data:
                 return artifact, final_payload
             return artifact
             

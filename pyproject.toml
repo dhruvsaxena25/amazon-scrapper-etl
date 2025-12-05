@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "amazon-scrapper-pipeline"
-version = "0.2.4"  # Added new functionality that is retuning data in memory, fastapi integration for serving data via API and frontend integration using Jinja2 templates. 
+version = "0.2.5"  # Added new functionality that is retuning data in memory, fastapi integration for serving data via API and frontend integration using Jinja2 templates. 
 description = "Independent URL and Product scraping pipelines for Amazon"
 readme = "README.md"
 requires-python = ">=3.10"

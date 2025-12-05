@@ -18,7 +18,7 @@ amazon_selectors:
   bot_detection:
     continue_button:
       by: "XPATH"
-      value: "//input[@type='submit']"
+      value: "/html/body/div/div[1]/div[3]/div/div/form/div/div/span/span/button"
   
   product_page:
     main_container:

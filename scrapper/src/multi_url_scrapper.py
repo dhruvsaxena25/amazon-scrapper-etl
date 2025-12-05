@@ -2,9 +2,11 @@ import os
 from pathlib import Path
 import sys
 
+
 # Add the project root to the Python path for direct script execution
 project_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(project_root))
+
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -25,10 +27,12 @@ import time
 import os, sys
 
 
+
 class AmazonUrlScraper:
     """
     Scrapes product URLs from Amazon search results and saves them to
     Artifacts/<timestamp>/UrlData/urls.json (per your configs).
+
 
     Notes:
       - Amazon's bot detection is strict. This does NOT solve captchas.
@@ -73,11 +77,14 @@ class AmazonUrlScraper:
         # Base URL (strip trailing slash to avoid //)
         self.base_url = (BASE_URL or "https://www.amazon.in/").rstrip("/")
 
+
         # Load locators from YAML
         self.locators = AmazonLocators(locators_config_path)
 
+
         # Ensure output dir exists
         self._ensure_output_dir()
+
 
         # Runtime
         self.driver = None
@@ -85,6 +92,7 @@ class AmazonUrlScraper:
         self.urls: list[str] = []
         self.all_results: dict[str, list[str]] = {}  # Store URLs per product
         self.current_target: int = 0  # Track current target for _collect_current_page
+
 
     # ----------------- Setup/Teardown -----------------
     def _ensure_output_dir(self):
@@ -106,6 +114,9 @@ class AmazonUrlScraper:
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1280,900")
         options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        options.add_argument("--disable-software-rasterizer")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-browser-side-navigation")
         
         return options
     
@@ -162,18 +173,26 @@ class AmazonUrlScraper:
         except Exception:
             log.warning(f'Page may not be fully loaded: "{self.driver.title}"')
 
+
     def _handle_bot_detection(self):
-        """Handle Amazon anti-bot 'Continue shopping' button."""
+        """Handle Amazon anti-bot 'Continue shopping' button if it appears."""
         try:
-            continue_btn = self.wait.until(
+            # Reduce wait time for bot detection check to avoid delays
+            short_wait = WebDriverWait(self.driver, 3)
+            continue_btn = short_wait.until(
                 EC.element_to_be_clickable(self.locators.continue_button.as_tuple())
             )
             continue_btn.click()
-            time.sleep(3)
-            log.info("Handled bot detection - clicked continue button")
+            time.sleep(2)
+            log.info("✓ Bot detection handled - clicked continue button")
             return True
         except TimeoutException:
+            # Button not present - this is normal behavior
             return False
+        except Exception as e:
+            log.debug(f"Bot detection check failed: {e}")
+            return False
+
 
     def _clean_href(self, href: str) -> str | None:
         """Clean and normalize product URLs."""
@@ -188,7 +207,11 @@ class AmazonUrlScraper:
         """Perform search for a specific term."""
         try:
             self.driver.get(self.base_url)
-            self._wait_for_page_load()            
+            self._wait_for_page_load()
+            
+            # Check for bot detection after initial page load
+            if self._handle_bot_detection():
+                self._wait_for_page_load()
            
             # Use locator from config
             bar = self.wait.until(
@@ -204,6 +227,11 @@ class AmazonUrlScraper:
             )
             btn.click()
             self._wait_for_page_load()
+            
+            # Check for bot detection after search results load
+            if self._handle_bot_detection():
+                self._wait_for_page_load()
+            
             log.info(f"Search completed for: '{search_term}'")
             
         except Exception as e:
@@ -236,9 +264,11 @@ class AmazonUrlScraper:
             if not href:
                 continue
 
+
             # Restrict to product pages only
             if "/dp/" not in href and "/gp/product/" not in href:
                 continue
+
 
             if href not in self.urls:
                 self.urls.append(href)
@@ -270,12 +300,18 @@ class AmazonUrlScraper:
             self.driver.execute_script("arguments[0].click();", nxt)
             time.sleep(2)  # Wait for navigation
             self._wait_for_page_load()
+            
+            # Check for bot detection after pagination
+            if self._handle_bot_detection():
+                self._wait_for_page_load()
+            
             log.info("Successfully navigated to next page")
             return True
             
         except Exception as e:
             log.info(f"No next page or click failed: {e}")
             return False
+
 
     def _save(self):
         """Save all collected URLs organized by search term with counts."""
@@ -306,10 +342,12 @@ class AmazonUrlScraper:
             log.error("Failed to save URL JSON.", exc_info=True)
             raise CustomException(e, sys)
 
+
     # ----------------- Public API -----------------
     def run(self) -> UrlDataArtifact | tuple[UrlDataArtifact, dict]:
         """
         Main execution method to scrape URLs for all search terms.
+
 
         Returns:
             UrlDataArtifact
@@ -347,6 +385,7 @@ class AmazonUrlScraper:
             
             payload = self._save()  # returns the dict
             artifact = UrlDataArtifact(url_file_path=self.url_cfg.url_file_path)
+
 
 
             if self.return_url_data:

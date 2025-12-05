@@ -288,8 +288,8 @@ def main():
         pipeline = AmazonScrapingPipeline(
             search_terms=['laptop pc'],
             target_links=1,  # 1 laptop, 2 mice
-            headless=True,  # Set to False to see browser
-            return_url_data=True,  # ← Get URL data in memory
+            headless=False,  # Set to False to see browser
+            return_url_data=False,  # ← Get URL data in memory
             return_prod_data=True  # ← Get product data in memory
         )
         
